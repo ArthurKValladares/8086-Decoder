@@ -1,5 +1,6 @@
 #include "8086_decode.h"
 
+#include <assert.h>
 #include <iostream>
 
 #define HAS_SEGMENT(usage) has_segment[usage_index(usage)]

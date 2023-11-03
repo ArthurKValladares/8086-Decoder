@@ -16,7 +16,13 @@ int main()
     // but it's fine for this constrained example
     char command_char_buffer[128];
     const char* dest_compiled_file = "dest_scratch";
+#ifdef __APPLE__
     const char* file_path = "./data/";
+    const char* remove_command = "rm ";
+#else
+    const char* file_path = "../data/";
+    const char* remove_command = "del ";
+#endif
     const char *files[] = {
         "listing_0037_single_register_mov",
         "listing_0038_many_register_mov",
@@ -48,8 +54,18 @@ int main()
         fclose(in_file);
 
         // Decode bytes to scratch destination file
-        dest_file = fopen("scratch.asm", "w");
-        dest_file = freopen(nullptr, "a", dest_file);
+        const char* scratch_file_path = "scratch.asm";
+        dest_file = fopen(scratch_file_path, "w");
+        if (!dest_file) {
+            printf("Failed to open scratch file at: %s", scratch_file_path);
+            return 1;
+        }
+        fclose(dest_file);
+        dest_file = fopen(scratch_file_path, "a");
+        if (!dest_file) {
+            printf("Failed to re-open scratch file at: %s", scratch_file_path);
+            return 1;
+        }
         fprintf(dest_file, "bits 16\n");
         dis_asm_8086(bytes, num_bytes, dest_file);
         fclose(dest_file);
@@ -72,11 +88,17 @@ int main()
         assert(memcmp(bytes, buffer, num_bytes) == 0);
         
         // Cleanup
-        strcpy(command_char_buffer, "rm ");
+        strcpy(command_char_buffer, remove_command);
         strcat(command_char_buffer, dest_compiled_file);
         system(command_char_buffer);
-        system("rm scratch");
-        system("rm scratch.asm");
+
+        strcpy(command_char_buffer, remove_command);
+        strcat(command_char_buffer, "scratch");
+        system(command_char_buffer);
+        
+        strcpy(command_char_buffer, remove_command);
+        strcat(command_char_buffer, "scratch.asm");
+        system(command_char_buffer);
 
         delete[] bytes;
         delete[] buffer;

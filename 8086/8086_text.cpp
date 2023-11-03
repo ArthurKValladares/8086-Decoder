@@ -1,6 +1,7 @@
 #include "8086_decode.h"
 #include "8086_text.h"
 
+#include <assert.h>
 #include <iostream>
 #include <optional>
 
